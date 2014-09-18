@@ -5,11 +5,6 @@ bluetooth, at some point) based presentation remote system.
 
 **NOTE: None of this works yet. The following is just a plan.**
 
-`premote` is meant to be used when you're in a pinch and don't have a
-presentation remote handy. I often leave my presentation remote in my laptop
-bag, which does me no good when presenting at my university with only my
-backpack. `premote` was born as my solution to this problem.
-
 The way it works is by spawning a simple (tls-enabled) web server (by making
 use of the Scotty framework). In the future, bluetooth may be supported in
 addition. There will probably also be additional security measures added to
