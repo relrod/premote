@@ -3,7 +3,20 @@
 This is the server site of the `premote` system - a very simple wifi (and maybe
 bluetooth, at some point) based presentation remote system.
 
-**NOTE: None of this works yet. The following is just a plan.**
+## Using
+
+**NOTE: None of this really works yet. The following is just a plan.**
+
+**NOTE 2: For some reason evince doesn't receive our key events. Why?**
+
+Go [here](http://www.akadia.com/services/ssh_test_certificate.html) and follow
+the instructions to create a self-signed (passwordless) SSL certificate. Store
+the certificate as `server.crt` and the key as `server.key`. Then:
+
+```bash
+$ premote-server $(xwininfo | grep 'Window id' | awk '{print $4}')
+# Then click the window you wish to control.
+```
 
 The way it works is by spawning a simple (tls-enabled) web server (by making
 use of the Scotty framework). In the future, bluetooth may be supported in
