@@ -2,6 +2,7 @@
 module Main where
 
 import Control.Applicative ((<$>))
+import Control.Monad
 import Control.Monad.IO.Class
 import Data.Monoid
 import Data.String (fromString)
@@ -14,6 +15,7 @@ import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (certFile, defaultTlsSettings,
                                     keyFile, runTLS)
 import Web.Scotty
+import System.Environment
 
 -- | Send a key to a given window (on a given rootwindow, on a given display).
 sendKey :: Display -> Window -> Window -> KeyMask -> KeySym -> IO ()
@@ -24,6 +26,7 @@ sendKey display rootwindow window keymask keysym = allocaXEvent $ \event -> do
   sendEvent display window True keyPressMask event
   setEventType event keyRelease
   sendEvent display window True keyReleaseMask event
+  flush display
 
 showInterfaces :: IO [(Int, NetworkInterface)]
 showInterfaces = do
@@ -48,6 +51,11 @@ getSelection interfaces selection = do
 
 main :: IO ()
 main = do
+  args <- getArgs
+  -- TODO: Use Maybe here.
+  when (length args /= 1) (error "Use `xwininfo` to get your window id and supply it as an argument to this program.")
+  let windowId = read $ head args
+
   putStrLn "Please select an interface to bind to."
   interfaces <- showInterfaces
   selection <- read <$> getLine :: IO Int
@@ -55,7 +63,7 @@ main = do
   d <- liftIO $ openDisplay ""
   rw <- liftIO $ rootWindow d $ defaultScreen d
   let settings' = setHost (fromString (show (ipv4 interface))) defaultSettings
-  app <- endpoints d rw 39845910 -- TODO
+  app <- endpoints d rw windowId
   runTLS
     (defaultTlsSettings { keyFile = "server.key" , certFile = "server.crt" })
     settings'
@@ -63,7 +71,11 @@ main = do
 
 endpoints :: Display -> Window -> Word64 -> IO Application
 endpoints d w wid = scottyApp $ do
-    get "/page-up" $ do
-      liftIO $ sendKey d w wid noModMask xK_Page_Up
-      liftIO $ flush d
-      text "done"
+  get "/page-up" $ do
+    sendKey' noModMask xK_Page_Up
+    text "done"
+  get "/page-down" $ do
+    sendKey' noModMask xK_Page_Down
+    text "done"
+  where
+    sendKey' mask sym = liftIO $ sendKey d w wid mask sym
