@@ -4,7 +4,9 @@ module Main where
 import Control.Applicative ((<$>))
 import Control.Monad
 import Control.Monad.IO.Class
+import Data.IORef
 import Data.Monoid
+import qualified Data.Text as T
 import Data.String (fromString)
 import Data.Word (Word64)
 import Graphics.X11.Xlib
@@ -15,7 +17,9 @@ import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (certFile, defaultTlsSettings,
                                     keyFile, runTLS)
 import Web.Scotty
+import Web.Scotty.Cookie
 import System.Environment
+import System.Random
 
 -- | Send a key to a given window (on a given rootwindow, on a given display).
 sendKey :: Display -> Window -> Window -> KeyMask -> KeySym -> IO ()
@@ -71,11 +75,23 @@ main = do
 
 endpoints :: Display -> Window -> Word64 -> IO Application
 endpoints d w wid = scottyApp $ do
+  sessionId <- liftIO $ mapM (\_ -> randomRIO ('a', 'z')) ([1..1000] :: [Int])
+  boundToSessionId <- liftIO $ newIORef False
   get "/page-up" $ do
+    sId <- getCookie "sessionid"
+    checkSession boundToSessionId sId (T.pack sessionId)
     sendKey' noModMask xK_Page_Up
     text "done"
   get "/page-down" $ do
+    sId <- getCookie "sessionid"
+    checkSession boundToSessionId sId (T.pack sessionId)
     sendKey' noModMask xK_Page_Down
     text "done"
   where
     sendKey' mask sym = liftIO $ sendKey d w wid mask sym
+    checkSessionId original given = maybe False (original ==) given
+    checkSession bound givenId originalId = do
+      isBound <- liftIO $ readIORef bound :: ActionM Bool
+      when (isBound && not (checkSessionId originalId givenId)) (raise "Invalid session ID")
+      setSimpleCookie "sessionid" originalId
+      liftIO $ writeIORef bound True
