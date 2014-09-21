@@ -77,6 +77,11 @@ endpoints :: Display -> Window -> Word64 -> IO Application
 endpoints d w wid = scottyApp $ do
   sessionId <- liftIO $ mapM (\_ -> randomRIO ('a', 'z')) ([1..1000] :: [Int])
   boundToSessionId <- liftIO $ newIORef False
+  get "/noop" $ do
+    -- Exists for clients to get a cookie without actually doing anything.
+    sId <- getCookie "sessionid"
+    checkSession boundToSessionId sId (T.pack sessionId)
+    text "welcome"
   get "/page-up" $ do
     sId <- getCookie "sessionid"
     checkSession boundToSessionId sId (T.pack sessionId)
