@@ -13,12 +13,14 @@
   <Button
       android:id="@+id/pgup"
       android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
+      android:layout_width="fill_parent"
+      android:layout_weight="1"
       android:text="Page Up" />
   <Button
       android:id="@+id/pgdown"
       android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
+      android:layout_width="fill_parent"
+      android:layout_weight="1"
       android:text="Page Down" />
 </LinearLayout>
 
