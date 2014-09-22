@@ -68,10 +68,13 @@ main = do
   rw <- liftIO $ rootWindow d $ defaultScreen d
   let settings' = setHost (fromString (show (ipv4 interface))) defaultSettings
   app <- endpoints d rw windowId
-  runTLS
+  {-runTLS
     (defaultTlsSettings { keyFile = "server.key" , certFile = "server.crt" })
     settings'
     app
+  -}
+  runSettings settings' app
+
 
 endpoints :: Display -> Window -> Word64 -> IO Application
 endpoints d w wid = scottyApp $ do
@@ -97,6 +100,8 @@ endpoints d w wid = scottyApp $ do
     checkSessionId original given = maybe False (original ==) given
     checkSession bound givenId originalId = do
       isBound <- liftIO $ readIORef bound :: ActionM Bool
-      when (isBound && not (checkSessionId originalId givenId)) (raise "Invalid session ID")
+      when (isBound && not (checkSessionId originalId givenId)) $ do
+        liftIO $ putStrLn "Invalid session ID received"
+        raise "Invalid session ID"
       setSimpleCookie "sessionid" originalId
       liftIO $ writeIORef bound True
