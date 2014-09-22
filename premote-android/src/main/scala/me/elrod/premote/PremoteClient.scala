@@ -1,6 +1,5 @@
 package me.elrod.premote
 
-import android.webkit.CookieManager
 import java.io.{ InputStreamReader }
 import java.net.{ HttpURLConnection, URL, URLEncoder }
 import javax.net.ssl._
