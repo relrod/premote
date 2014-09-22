@@ -29,3 +29,9 @@ libraryDependencies += "org.scalaz" %% "scalaz-concurrent" % "7.1.0"
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.0"
 
 libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.1.0"
+
+useProguard in Android := true
+
+proguardOptions in Android += "-dontwarn javax.swing.**"
+
+proguardCache in Android += ProguardCache("scalaz") % "org.scalaz"
