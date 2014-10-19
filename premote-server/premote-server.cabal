@@ -2,7 +2,7 @@ name:                premote-server
 version:             0.1.0.0
 synopsis:            The server component of premote
 -- description:
-homepage:            https://github.com/CodeBlock/premote-server/
+homepage:            https://github.com/relrod/premote-server/
 license:             BSD2
 license-file:        LICENSE
 author:              Ricky Elrod
